@@ -1,0 +1,321 @@
+/**
+ * VincereBackground — Framer Code Component
+ * ─────────────────────────────────────────────────────────────────────────────
+ * A full-screen, fixed Three.js coin background for Framer.
+ *
+ * FEATURES
+ *   • Auto-detects Framer page scroll — no prop wiring needed
+ *   • Coin rotates & subtly scales as user scrolls through sections
+ *   • Drag to flip (mouse + touch) still works
+ *   • Transparent background — sits behind all Framer content layers
+ *   • Shimmer light orbits continuously
+ *
+ * HOW TO USE IN FRAMER
+ *   1. Assets → Code → + → name "texture"        → paste texture.ts
+ *   2. Assets → Code → + → name "VincereBackground" → paste this file
+ *   3. Drag <VincereBackground> onto the canvas
+ *   4. In the right panel set: Position = Fixed, W = 100vw, H = 100vh
+ *   5. In the layer panel drag it to the BOTTOM (behind all other layers)
+ *   6. Add your sections / content on top — scroll works automatically!
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+import { useEffect, useRef } from "react"
+import { useScroll } from "framer-motion"
+import { addPropertyControls, ControlType } from "framer"
+import TEXTURE_SRC from "./texture"
+
+// ─── types ───────────────────────────────────────────────────────────────────
+interface Props {
+    /** How many full Y-rotations the coin completes over the full page scroll */
+    rotationTurns: number
+    /** How much the coin shrinks at the bottom of the page (0 = none, 0.5 = 50%) */
+    scaleShrink: number
+    /** Optional image override — drag a Framer Asset here to swap the coin face */
+    image: string
+}
+
+// ─── component ───────────────────────────────────────────────────────────────
+export default function VincereBackground({
+    rotationTurns = 2,
+    scaleShrink = 0.15,
+    image,
+}: Props) {
+    const mountRef = useRef<HTMLDivElement>(null)
+    const stateRef = useRef<any>(null)
+    const { scrollYProgress } = useScroll() // auto-reads Framer page scroll (0→1)
+
+    // ── Scene initialisation (runs once) ─────────────────────────────────────
+    useEffect(() => {
+        const container = mountRef.current
+        if (!container) return
+
+        // Load Three.js from CDN
+        const existing = document.getElementById("three-js-cdn")
+        const script = existing || document.createElement("script")
+        if (!existing) {
+            script.id = "three-js-cdn"
+            script.src =
+                "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"
+            document.head.appendChild(script)
+        }
+
+        const setup = () => init()
+        if ((window as any).THREE) {
+            setup()
+        } else {
+            script.addEventListener("load", setup)
+        }
+
+        function init() {
+            const THREE = (window as any).THREE
+
+            // ── Renderer ─────────────────────────────────────────────────────
+            const renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+            })
+            renderer.setSize(container.clientWidth, container.clientHeight)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+            renderer.toneMapping = THREE.ACESFilmicToneMapping
+            renderer.toneMappingExposure = 1.2
+            renderer.domElement.style.width = "100%"
+            renderer.domElement.style.height = "100%"
+            renderer.domElement.style.display = "block"
+            container.appendChild(renderer.domElement)
+
+            // ── Scene + Camera ────────────────────────────────────────────────
+            const scene = new THREE.Scene()
+            const camera = new THREE.PerspectiveCamera(
+                50,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            )
+            camera.position.z = 4
+
+            // ── Texture + Materials ───────────────────────────────────────────
+            const textureSrc = image || TEXTURE_SRC
+            const loader = new THREE.TextureLoader()
+
+            const texture = loader.load(textureSrc)
+            const faceMat = new THREE.MeshStandardMaterial({
+                map: texture,
+                roughness: 0.25,
+                metalness: 0.7,
+                side: THREE.DoubleSide,
+            })
+
+            const edgeMat = new THREE.MeshStandardMaterial({
+                color: 0xa87064, // terracotta rose gold rim
+                roughness: 0.3,
+                metalness: 0.6,
+            })
+
+            const backTexture = loader.load(textureSrc)
+            backTexture.rotation = Math.PI
+            backTexture.center.set(0.5, 0.5)
+            const backMat = new THREE.MeshStandardMaterial({
+                map: backTexture,
+                roughness: 0.18,
+                metalness: 0.6,
+                envMapIntensity: 1.2,
+            })
+
+            // ── Coin Mesh ─────────────────────────────────────────────────────
+            const coin = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.5, 1.5, 0.06, 128),
+                [edgeMat, faceMat, backMat]
+            )
+            coin.rotation.x = Math.PI / 2
+
+            const pivot = new THREE.Group()
+            pivot.add(coin)
+            pivot.rotation.z = Math.PI / 2
+            scene.add(pivot)
+
+            // ── Lighting ──────────────────────────────────────────────────────
+            const keyLight = new THREE.DirectionalLight(0xfff0d0, 4)
+            keyLight.position.set(3, 5, 4)
+            const fillLight = new THREE.DirectionalLight(0xaabbff, 1.2)
+            fillLight.position.set(-4, -2, 2)
+            const rimLight = new THREE.DirectionalLight(0xffe0a0, 2)
+            rimLight.position.set(0, -4, -3)
+            const shimmer = new THREE.PointLight(0xffd080, 2, 8)
+            shimmer.position.set(1, 1, 3)
+            scene.add(keyLight, fillLight, rimLight, shimmer)
+            scene.add(new THREE.AmbientLight(0xffffff, 0.3))
+
+            // ── Quaternion helpers ────────────────────────────────────────────
+            const WORLD_Y = new THREE.Vector3(0, 1, 0)
+            const WORLD_X = new THREE.Vector3(1, 0, 0)
+            const frontQuat = new THREE.Quaternion()
+            const scrollQuat = new THREE.Quaternion()
+            const tmpYQuat = new THREE.Quaternion()
+            const tmpQuat = new THREE.Quaternion()
+
+            frontQuat.copy(pivot.quaternion)
+            scrollQuat.copy(frontQuat)
+
+            function updateScrollQuat(rotY: number) {
+                tmpYQuat.setFromAxisAngle(WORLD_Y, rotY)
+                scrollQuat.copy(frontQuat)
+                scrollQuat.premultiply(tmpYQuat)
+            }
+
+            // ── Drag ─────────────────────────────────────────────────────────
+            let isDragging = false
+            let isReturning = false
+            let prevX = 0, prevY = 0
+
+            function onStart(x: number, y: number) {
+                isDragging = true
+                isReturning = false
+                prevX = x; prevY = y
+            }
+            function onMove(x: number, y: number) {
+                if (!isDragging) return
+                const dx = x - prevX, dy = y - prevY
+                tmpQuat.setFromAxisAngle(WORLD_Y, dx * 0.005)
+                pivot.quaternion.premultiply(tmpQuat)
+                tmpQuat.setFromAxisAngle(WORLD_X, dy * 0.005)
+                pivot.quaternion.premultiply(tmpQuat)
+                prevX = x; prevY = y
+            }
+            function onEnd() {
+                isDragging = false
+                isReturning = true
+            }
+
+            const el = renderer.domElement
+            el.addEventListener("mousedown", e => onStart(e.clientX, e.clientY))
+            el.addEventListener("mousemove", e => onMove(e.clientX, e.clientY))
+            el.addEventListener("mouseup", onEnd)
+            el.addEventListener("mouseleave", onEnd)
+            el.addEventListener("touchstart", e => { e.preventDefault(); onStart(e.touches[0].clientX, e.touches[0].clientY) }, { passive: false })
+            el.addEventListener("touchmove",  e => { e.preventDefault(); onMove(e.touches[0].clientX,  e.touches[0].clientY)  }, { passive: false })
+            el.addEventListener("touchend", onEnd)
+
+            // ── Animation loop ────────────────────────────────────────────────
+            let clock = 0
+            let animId: number
+
+            function animate() {
+                animId = requestAnimationFrame(animate)
+                clock += 0.01
+                shimmer.position.set(
+                    Math.sin(clock * 0.7) * 2,
+                    Math.cos(clock * 0.5) * 2,
+                    3
+                )
+                if (!isDragging) {
+                    if (isReturning) {
+                        pivot.quaternion.slerp(scrollQuat, 0.015)
+                        if (pivot.quaternion.angleTo(scrollQuat) < 0.001)
+                            isReturning = false
+                    } else {
+                        pivot.quaternion.slerp(scrollQuat, 0.08)
+                    }
+                }
+                renderer.render(scene, camera)
+            }
+            animate()
+
+            // ── Resize observer ───────────────────────────────────────────────
+            const ro = new ResizeObserver(() => {
+                const w = container.clientWidth
+                const h = container.clientHeight
+                renderer.setSize(w, h)
+                camera.aspect = w / h
+                camera.updateProjectionMatrix()
+            })
+            ro.observe(container)
+
+            stateRef.current = {
+                pivot, faceMat, backMat, updateScrollQuat,
+                renderer, animId, ro, THREE,
+            }
+        }
+
+        return () => {
+            const s = stateRef.current
+            if (!s) return
+            cancelAnimationFrame(s.animId)
+            s.ro.disconnect()
+            s.renderer.dispose()
+            if (container.contains(s.renderer.domElement))
+                container.removeChild(s.renderer.domElement)
+            stateRef.current = null
+        }
+    }, [])
+
+    // ── Auto scroll → coin rotation + scale ──────────────────────────────────
+    useEffect(() => {
+        return scrollYProgress.on("change", (progress: number) => {
+            const s = stateRef.current
+            if (!s) return
+            // Coin rotates based on scroll progress × number of turns
+            const rotY = -(progress * rotationTurns) * Math.PI * 2
+            s.updateScrollQuat(rotY)
+            // Subtle scale change
+            s.pivot.scale.setScalar(1 - progress * scaleShrink)
+        })
+    }, [scrollYProgress, rotationTurns, scaleShrink])
+
+    // ── Image swap ────────────────────────────────────────────────────────────
+    useEffect(() => {
+        const s = stateRef.current
+        if (!s) return
+        const src = image || TEXTURE_SRC
+
+        const newTex = new s.THREE.TextureLoader().load(src)
+        s.faceMat.map = newTex
+        s.faceMat.needsUpdate = true
+
+        const newBackTex = new s.THREE.TextureLoader().load(src)
+        newBackTex.rotation = Math.PI
+        newBackTex.center.set(0.5, 0.5)
+        s.backMat.map = newBackTex
+        s.backMat.needsUpdate = true
+    }, [image])
+
+    return (
+        <div
+            ref={mountRef}
+            style={{
+                width: "100%",
+                height: "100%",
+                background: "transparent",
+                cursor: "grab",
+                overflow: "hidden",
+            }}
+        />
+    )
+}
+
+// ─── Framer property controls ─────────────────────────────────────────────────
+addPropertyControls(VincereBackground, {
+    image: {
+        type: ControlType.Image,
+        title: "Coin Texture",
+        description: "Swap the coin face image. Defaults to built-in texture.",
+    },
+    rotationTurns: {
+        type: ControlType.Number,
+        title: "Rotation Turns",
+        defaultValue: 2,
+        min: 0,
+        max: 10,
+        step: 0.5,
+        description: "Full Y-rotations the coin completes as user scrolls to bottom.",
+    },
+    scaleShrink: {
+        type: ControlType.Number,
+        title: "Scale Shrink",
+        defaultValue: 0.15,
+        min: 0,
+        max: 0.5,
+        step: 0.01,
+        description: "How much the coin shrinks toward the bottom (0 = stays same size).",
+    },
+})

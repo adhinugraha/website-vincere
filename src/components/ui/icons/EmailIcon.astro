@@ -1,0 +1,20 @@
+---
+const { class: className } = Astro.props;
+
+// Placeholder path for Email Icon if svgPaths.p16763a70 is missing
+const path = "M30.4 0H3.2C1.4 0 0 1.4 0 3.2v15.8c0 1.8 1.4 3.2 3.2 3.2h27.2c1.8 0 3.2-1.4 3.2-3.2V3.2c0-1.8-1.4-3.2-3.2-3.2zm-1.6 3.2L16.8 11.6 4.8 3.2h24zM3.2 19V5.2l13.6 9.4 13.6-9.4V19H3.2z";
+---
+
+<div class={`-scale-y-100 rotate-180 ${className}`}>
+  <svg viewBox="0 0 33.6 22.2" fill="none" class="w-[34px] h-[22px]">
+    <path d={path} fill="url(#em)" />
+    <defs>
+      <linearGradient id="em" x1="0" x2="33.6" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#6A3F3A" />
+        <stop offset="0.3" stop-color="#B8877C" />
+        <stop offset="0.55" stop-color="#E6C2B8" />
+        <stop offset="1" stop-color="#6A3F3A" />
+      </linearGradient>
+    </defs>
+  </svg>
+</div>

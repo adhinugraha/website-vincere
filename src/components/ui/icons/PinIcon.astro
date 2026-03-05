@@ -1,0 +1,17 @@
+---
+const { class: className } = Astro.props;
+
+// Placeholder path for Pin Icon if svgPaths.p32923f80 is missing
+const path = "M12 0c-5.522 0-10 4.477-10 10 0 7.222 9.188 16.148 9.58 16.528.106.103.245.155.385.155s.279-.052.385-.155c.392-.38 9.58-9.306 9.58-16.528 0-5.523-4.478-10-10-10zm0 15c-2.761 0-5-2.239-5-5s2.239-5 5-5 5 2.239 5 5-2.239 5-5 5z";
+---
+
+<svg viewBox="0 0 24 32.7272" fill="none" class={`w-6 h-8 shrink-0 ${className}`}>
+  <path clip-rule="evenodd" d={path} fill="url(#pin)" fill-rule="evenodd" />
+  <defs>
+    <linearGradient id="pin" x1="0" x2="24" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0.149" stop-color="#9E695D" />
+      <stop offset="0.5" stop-color="#ECAB96" />
+      <stop offset="0.779" stop-color="#A87064" />
+    </linearGradient>
+  </defs>
+</svg>

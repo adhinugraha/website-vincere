@@ -1,0 +1,119 @@
+---
+//Import relevant dependencies
+import enStrings from '@utils/navigation.ts';
+---
+<div class="md:hidden z-[100] bg-black/90 backdrop-blur-md border-b border-white/5">
+  <div class="navbar-mobile-slider py-4 overflow-hidden">
+    {
+      enStrings.navBarLinks.map((link, index) => (
+        <div class="px-2 text-center outline-none cursor-pointer">
+          <a
+            // href={link.url}
+            data-index={index}
+            class="nav-mobile-link text-base font-primary uppercase tracking-[0.2em] transition-all duration-500 text-white block py-2"
+          >
+            {link.name}
+          </a>
+          <div class="nav-underline h-[1px] w-0 mx-auto bg-orange-400 mt-0.5 transition-all duration-500 opacity-0" />
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style is:global>
+  .navbar-mobile-slider .slick-list {
+    overflow: visible !important;
+  }
+  
+  .navbar-mobile-slider .slick-slide {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.8);
+    opacity: 0.2;
+  }
+
+  .navbar-mobile-slider .slick-current {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  .navbar-mobile-slider .slick-current .nav-mobile-link {
+    font-size: 1.1rem;
+    letter-spacing: 0.3em;
+  }
+  
+  .navbar-mobile-slider .slick-current .nav-underline {
+    width: 2.5rem !important;
+    opacity: 1 !important;
+  }
+</style>
+
+<script is:inline>
+  $(document).ready(function() {
+    const $mobileNav = $('.navbar-mobile-slider');
+    const $mainSlider = $('.slick-slider');
+
+    if ($mobileNav.length && $mainSlider.length) {
+      // Initialize mobile nav slider
+      $mobileNav.slick({
+        slidesToShow: 1,
+        centerMode: true,
+        centerPadding: '35%',
+        arrows: false,
+        dots: false,
+        infinite: false,
+        focusOnSelect: true,
+        swipe: true,
+        touchMove: true,
+        speed: 800,
+        cssEase: 'cubic-bezier(0.645, 0.045, 0.355, 1)'
+      });
+
+      // Sync mobile nav with main slider
+      $mainSlider.on('afterChange', function(event, slick, currentSlide) {
+        if ($mobileNav.slick('getSlick').currentSlide !== currentSlide) {
+          $mobileNav.slick('slickGoTo', currentSlide);
+        }
+      });
+
+      // Sync main slider with mobile nav
+      $mobileNav.on('afterChange', function(event, slick, currentSlide) {
+        if ($mainSlider.slick('getSlick').currentSlide !== currentSlide) {
+          $mainSlider.slick('slickGoTo', currentSlide);
+        }
+      });
+
+      // Sync mobile nav when scrolling back to the hero
+      window.addEventListener('coin-scroll', (e) => {
+        const detail = e.detail;
+        if (detail && detail.sectionId === 'section-hero') {
+          if ($mobileNav.slick('getSlick').currentSlide !== 0) {
+            $mobileNav.slick('slickGoTo', 0);
+          }
+        }
+      });
+
+      // Handle clicks on mobile nav links
+      $('.nav-mobile-link').on('click', function(e) {
+        e.preventDefault();
+        const index = $(this).data('index');
+        
+        // Sync the mobile nav slider
+        $mobileNav.slick('slickGoTo', index);
+        
+        // Go to the corresponding slide in the main slider
+        // This will trigger the slider's afterChange which handles syncing back
+        $mainSlider.slick('slickGoTo', index);
+
+        // Smoothly scroll to the slider container to ensure it's in view
+        const sliderTop = $mainSlider.offset().top;
+        const navHeight = $('.md\:hidden.fixed.top-16').outerHeight() || 0;
+        const headerHeight = 64; // Approximate height of HeaderMobile (top-16)
+        
+        $('html, body').animate({
+          scrollTop: sliderTop - navHeight - headerHeight
+        }, 800);
+      });
+    }
+  });
+</script>

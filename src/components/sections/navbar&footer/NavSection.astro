@@ -1,0 +1,116 @@
+---
+import enStrings from '@utils/navigation.ts';
+---
+
+<div class="flex nav-section-container w-full overflow-x-auto mb-[30px]">
+    {
+      enStrings.navBarLinks.map((link, index) => (
+        <div class="flex justify-center px-[1vw] items-center">
+          <a href={link.url}
+              data-index={index}
+              class="nav-section-item w-[90vw] py-4 text-center"
+          >
+              <span class="nav-section-label text-white text-3xl font-primary uppercase">
+              {link.name}
+              </span>
+          </a>
+        </div>
+      ))
+    }
+</div>
+
+<style is:global>
+  .nav-section-container .slick-list {
+    overflow: visible !important;
+  }
+  
+  .nav-section-container .slick-slide {
+    transition: all 0.5s ease;
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+
+  .nav-section-container .slick-current {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .nav-section-item.active .nav-section-label {
+    color: #fb923c !important; /* orange-400 */
+    font-size: 1.5rem;
+    letter-spacing: 0.4em;
+  }
+  
+  .nav-section-item.active .nav-underline {
+    width: 4rem !important;
+    opacity: 1 !important;
+  }
+</style>
+
+<script is:inline>
+  $(document).ready(function() {
+    const $navSlider = $('.nav-section-container');
+    const $mainSlider = $('.slick-slider');
+
+    if ($navSlider.length && $mainSlider.length) {
+      // Initialize Nav Section Slider optimized for 98vw per item
+      $navSlider.slick({
+        slidesToShow: 1,
+        centerMode: true,
+        centerPadding: '1vw',
+        arrows: false,
+        dots: false,
+        infinite: false,
+        focusOnSelect: true,
+        swipe: true,
+        touchMove: true,
+        speed: 800,
+        cssEase: 'cubic-bezier(0.645, 0.045, 0.355, 1)'
+      });
+
+      // Set initial active state
+      $('.nav-section-item').eq(0).addClass('active');
+
+      // Sync Nav Section with Main Slider
+      $mainSlider.on('afterChange', function(event, slick, currentSlide) {
+        if ($navSlider.slick('getSlick').currentSlide !== currentSlide) {
+          $navSlider.slick('slickGoTo', currentSlide);
+        }
+        $('.nav-section-item').removeClass('active');
+        $('.nav-section-item').filter(`[data-index="${currentSlide}"]`).addClass('active');
+      });
+
+      // Sync Main Slider with Nav Section
+      $navSlider.on('afterChange', function(event, slick, currentSlide) {
+        if ($mainSlider.slick('getSlick').currentSlide !== currentSlide) {
+          $mainSlider.slick('slickGoTo', currentSlide);
+        }
+      });
+
+      // Click handler for items
+      $('.nav-section-item').on('click', function(e) {
+        e.preventDefault();
+        const index = $(this).data('index');
+        
+        // Sync the nav slider
+        if ($navSlider.slick('getSlick').currentSlide !== index) {
+          $navSlider.slick('slickGoTo', index);
+        }
+        
+        // Sync the main content slider
+        if ($mainSlider.slick('getSlick').currentSlide !== index) {
+          $mainSlider.slick('slickGoTo', index);
+        }
+
+        // Smoothly scroll to the main slider if it's not in view
+        const sliderTop = $mainSlider.offset().top;
+        const navHeight = $navSlider.outerHeight() || 0;
+        const headerHeight = 64; // Offset for the fixed header
+        
+        $('html, body').animate({
+          scrollTop: sliderTop - navHeight - headerHeight
+        }, 800);
+      });
+    }
+  });
+</script>

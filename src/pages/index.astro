@@ -1,147 +1,195 @@
 ---
 // Import the necessary components
+import CoinMobileBackground from '@/components/CoinMobileBackground.astro';
 import MainLayout from '@/layouts/MainLayout.astro';
-import HeroSection from '@components/sections/landing/HeroSection.astro';
-import HeroSectionAlt from '@components/sections/landing/HeroSectionAlt.astro';
-import ClientsSection from '@components/sections/landing/ClientsSection.astro';
-import FeaturesGeneral from '@components/sections/features/FeaturesGeneral.astro';
-import FeaturesNavs from '@components/sections/features/FeaturesNavs.astro';
-import TestimonialsSection from '@components/sections/testimonials/TestimonialsSection.astro';
-import PricingSection from '@components/sections/pricing/PricingSection.astro';
-import FAQ from '@components/sections/misc/FAQ.astro';
-import AnnouncementBanner from '@components/ui/banners/AnnouncementBanner.astro';
-import heroImage from '@images/hero-image.avif';
-import faqs from '@data/faqs.json';
-import features from '@data/features.json';
-import pricing from '@data/pricing.json';
-import featureImage from '@images/features-image.avif';
-import construction from '@images/construction-image.avif';
-import tools from '@images/automated-tools.avif';
-import dashboard from '@images/dashboard-image.avif';
-import { partnersData } from '@/data_files/constants';
-
-const avatarSrcs: Array<string> = [
-  'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80',
-  'https://images.unsplash.com/photo-1531927557220-a9e23c1e4794?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80',
-  'https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&&auto=format&fit=facearea&facepad=3&w=300&h=300&q=80',
-  'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80',
-];
+import Navbar from '@components/sections/navbar&footer/Navbar.astro';
+import NavbarMobile from '@components/sections/navbar&footer/NavbarMobile.astro';
+import NavSection from '@components/sections/navbar&footer/NavSection.astro';
+import CoinBackground from '@components/CoinBackground.astro';
+import { Image } from "astro:assets";
+import pinIcon from "@/images/pin-icon.png";
+import emailIcon from "@/images/email-icon.png";
 ---
-
 <MainLayout>
-  <AnnouncementBanner
-    btnId="dismiss-button"
-    btnTitle="Explore ScrewFast on GitHub"
-    url="https://github.com/mearashadowfax/ScrewFast"
-  />
+    <div class="relative z-10 main-container home-container">
+        <section class="flex flex-col hero-coin section-hero" id="section-hero">
+            <h1 class="text-[2em] md:text-6xl text-white font-primary text-center leading-[1.25] mb-[20px]">
+                Building a Stronger Local Network for Workers & Businesses in Bali
+            </h1>
+            <h2 class="text-white font-secondary text-center leading-[1.5]">
+                We are organizing drivers, workers and merchants intor a structured community network that will provide better coordination, visibility and future financial access.
+            </h2>
+            <CoinMobileBackground />
+        </section>
+        <NavSection />
+        <div class="slick-slider" data-slick='{"slidesToShow": 1, "slidesToScroll": 1, "vertical": false, "verticalSwiping": false, "dots": false, "arrows": false, "infinite": false}'>
+            <section class="flex items-center justify-center flex-col" id="contact">
+                <h3 class="text-4xl text-white px-3 color-rosegold text-center mb-[10px]">Institutional Enquiries</h3>
+                <p class="text-white font-secondary text-center leading-[1.5] mb-[20px]">
+                    All Engagements are conducted by appointments only
+                </p>
+                <div class="w-full h-[100vw] overflow-hidden mb-[30px]">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d466.8284402163347!2d103.84762266179024!3d1.2783941024534091!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da190da29d46cf%3A0xdafb9cf3d50811f2!2sSleek!5e0!3m2!1sen!2sid!4v1772726038179!5m2!1sen!2sid"
+                        width="100%"
+                        height="100%"
+                        style={{
+                        border: 0,
+                        display: "block",
+                        filter: "invert(90%) hue-rotate(180deg) saturate(0.85) brightness(0.95)",
+                        }}
+                        allowfullscreen={true}
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Vincere One Reserve Location"
+                    />
+                </div>
 
-  <HeroSection
-    title=`Equip Your Projects with <span
-        class="text-yellow-500 dark:text-yellow-400">ScrewFast</span>`
-    subTitle="Top-quality hardware tools and expert construction services for every project need."
-    primaryBtn="Start Exploring"
-    primaryBtnURL="/products"
-    secondaryBtn="Contact Sales Team"
-    secondaryBtnURL="/contact"
-    withReview={true}
-    avatars={avatarSrcs}
-    rating=`<span class="font-bold">4.8</span> / 5`
-    starCount={4}
-    reviews=`From Over <span class="font-bold">12.8k</span> Reviews`
-    src={heroImage}
-    alt="Stack of ScrewFast product boxes containing assorted hardware tools"
-  />
-
-  <ClientsSection
-    title="Trusted by Industry Leaders"
-    subTitle="Experience the reliability chosen by industry giants."
-    partners={partnersData}
-  />
-
-  <FeaturesGeneral
-    title="Meeting Industry Demands"
-    subTitle="At ScrewFast, we tackle the unique challenges encountered in the hardware and construction sectors. From cutting-edge tools to expert services, we're dedicated to helping you overcome obstacles and achieve your goals."
-    src={featureImage}
-    alt="ScrewFast products in floating boxes"
-    features={features}
-  />
-
-  <FeaturesNavs
-    title=`Customize <span class="text-yellow-500 dark:text-yellow-400">ScrewFast</span>'s offerings to perfectly suit your hardware and construction needs.`
-    tabs={[
-      {
-        heading: 'Cutting-Edge Tools',
-        content:
-          "Empower your projects with ScrewFast's cutting-edge tools. Experience enhanced efficiency in construction management with our sophisticated automated solutions.",
-        svg: 'tools',
-        src: tools,
-        alt: 'Yellow and black heavy equipment on brown grass field',
-        first: true,
-      },
-      {
-        heading: 'Intuitive Dashboards',
-        content:
-          "Navigate with ease using ScrewFast's intuitive dashboards. Set up and oversee your projects seamlessly, with user-friendly interfaces designed for quick and effective workflow management.",
-        svg: 'dashboard',
-        src: dashboard,
-        alt: 'A screenshot or graphic representation of the intuitive dashboard',
-        second: true,
-      },
-      {
-        heading: 'Robust Features',
-        content:
-          "Minimize complexity, maximize productivity. ScrewFast's robust features are engineered to streamline your construction process, delivering results that stand out for their excellence.",
-        svg: 'house',
-        src: construction,
-        alt: 'Gray metal building frame near tower crane during daytime',
-      },
-    ]}
-  />
-
-  <TestimonialsSection
-    title="Fast-Track Your Projects"
-    subTitle="At ScrewFast, we ensure a swift start with instant account setup. Experience the speed of construction redefined."
-    ;
-    testimonials={[
-      {
-        content:
-          'ScrewFast dramatically boosted our project efficiency. Setup was instant, and their rapid response times are phenomenal. Truly a game-changer in hardware and construction support!',
-        author: 'Samantha Ruiz',
-        role: 'Chief Operating Officer | ConstructIt Inc.',
-        avatarSrc:
-          'https://images.unsplash.com/photo-1593104547489-5cfb3839a3b5?q=80&w=1453&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80',
-      },
-    ]}
-    statistics={[
-      {
-        count: '70k+',
-        description:
-          'customers equipped — from DIY to major construction firms',
-      },
-      {
-        count: '35%',
-        description:
-          'uptick in project efficiency with ScrewFast tools and services',
-      },
-      {
-        count: '15.3%',
-        description:
-          'reduction in maintenance costs reported by long-term clients',
-      },
-      {
-        count: '2x',
-        description: 'quicker assembly using innovative fastening solutions',
-      },
-    ]}
-  />
-
-  <PricingSection pricing={pricing} />
-
-  <FAQ title="Frequently<br />asked questions" faqs={faqs} />
-
-  <HeroSectionAlt
-    title="Let's Build Together"
-    subTitle="ScrewFast is an open-source template, meticulously crafted with Astro, Tailwind CSS, and Preline UI frameworks."
-    url="https://github.com/mearashadowfax/ScrewFast"
-  />
+                <div class="flex items-center gap-6 py-[10px]">
+                    <Image 
+                        src={pinIcon} 
+                        alt="Vincere Logo" 
+                        class="h-[40px] w-auto object-contain"
+                        loading="eager"
+                    />
+                    <p class="text-white">160 Robinson Road, #14-04 SBF Center, Singapore 068914</p>
+                </div>
+                <div class="flex items-center gap-6 py-[10px]">
+                    <Image 
+                        src={emailIcon} 
+                        alt="Vincere Logo" 
+                        class="h-[40px] w-auto object-contain"
+                        loading="eager"
+                    />
+                    <p class="text-white">sya@vincereonereserve.com</p>
+                </div>
+            </section>
+        </div>
+    </div>
 </MainLayout>
+
+<script is:inline src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+
+<script is:inline>
+  $(document).ready(function(){
+    const $slider = $('.slick-slider');
+    
+    $slider.slick({
+      vertical: true,
+      verticalSwiping: true,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      dots: true,
+      arrows: false,
+      infinite: false,
+      speed: 1000,
+      cssEase: 'cubic-bezier(0.645, 0.045, 0.355, 1)'
+    });
+
+    // Handle mousewheel for vertical scrolling
+    $slider.on('wheel', function(e) {
+      const slick = $slider.slick('getSlick');
+      const currentSlide = slick.currentSlide;
+      const totalSlides = slick.slideCount;
+      const deltaY = e.originalEvent.deltaY;
+
+      // Allow scrolling up from the first slide to the hero
+      if (currentSlide === 0 && deltaY < 0) {
+        return; // Let native scroll handle it
+      }
+
+      // Allow scrolling down from the last slide
+      if (currentSlide === totalSlides - 1 && deltaY > 0) {
+        return; // Let native scroll handle it
+      }
+
+      e.preventDefault();
+      if (deltaY > 0) {
+        $(this).slick('slickNext');
+      } else {
+        $(this).slick('slickPrev');
+      }
+    });
+
+    // Sync CoinBackground progress with Slick Slider
+    $slider.on('afterChange', function(event, slick, currentSlide) {
+      const totalSlides = slick.slideCount;
+      const progress = currentSlide / (totalSlides - 1);
+      
+      // Get the ID of the current slide's section
+      const $currentSlide = $(slick.$slides.get(currentSlide));
+      const sectionId = $currentSlide.find('section[id]').attr('id') || $currentSlide.attr('id');
+      
+      // Calculate VH for scroll spy and other listeners
+      const vh = progress * (document.documentElement.scrollHeight / window.innerHeight) * 100;
+      window.dispatchEvent(new CustomEvent('coin-scroll', { detail: { vh, progress, sectionId, currentSlide } }));
+    });
+
+    // Handle manual scroll to sync mobile nav when reaching the hero
+    $(window).on('scroll', function() {
+      if ($(window).scrollTop() < 50) {
+        window.dispatchEvent(new CustomEvent('coin-scroll', { detail: { vh: 0, progress: 0, sectionId: 'section-hero', currentSlide: -1 } }));
+      }
+    });
+
+    // Handle nav clicks for Slick
+    $('nav a[href^="#"]').on('click', function(e) {
+      const targetId = $(this).attr('href');
+      if (targetId === '#') return;
+      
+      const $target = $(targetId);
+      if ($target.length) {
+        // Find the index of the slide containing the target element
+        const slideIndex = $target.closest('.slick-slide').data('slick-index');
+        if (typeof slideIndex !== 'undefined') {
+          e.preventDefault();
+          e.stopImmediatePropagation(); // Prevent other listeners like Lenis
+          $slider.slick('slickGoTo', slideIndex);
+        } else if (targetId === '#section-hero') {
+          // If we're scrolling to the hero, let Lenis handle it or scroll naturally
+          // We don't preventDefault here
+        }
+      }
+    });
+  });
+</script>
+
+<style is:global>
+  /* Ensure the slider and its slides take full height */
+  .slick-slider, .slick-list, .slick-track {
+    height: 100vh !important;
+  }
+  
+  .slick-slide {
+    height: 100vh !important;
+  }
+
+  /* Custom Slick Dots Styling */
+  .slick-dots {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex !important;
+    flex-direction: column;
+    width: auto;
+    bottom: auto;
+    z-index: 100;
+  }
+  
+  .slick-dots li {
+    margin: 10px 0;
+  }
+  
+  .slick-dots li button:before {
+    color: white !important;
+    font-size: 12px;
+    opacity: 0.5;
+  }
+  
+  .slick-dots li.slick-active button:before {
+    opacity: 1;
+    color: #ff801f !important; /* Orange accent */
+  }
+</style>
